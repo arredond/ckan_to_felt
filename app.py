@@ -8,6 +8,7 @@ from ckan_api import (
     get_package,
     get_package_url,
     search_packages,
+    KNOWN_CKAN_API_URLS,
 )
 
 st.set_page_config(page_title="CKAN -> Felt", page_icon="📊")
@@ -15,11 +16,17 @@ st.set_page_config(page_title="CKAN -> Felt", page_icon="📊")
 st.title("CKAN API -> Felt")
 
 st.subheader("1. Choose a CKAN API")
-st.text('Input a CKAN API URL (ending in "/api/3/")')
-st.text("Example: https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/")
-# st.text('Input a CKAN API URL (ending in ""/api/3/") or choose from the dropdown')
+st.markdown(
+    """_Input a CKAN API URL (ending in "/api/3/") or choose from the dropdown_"""
+)
 ckan_base_url = st.text_input("CKAN Base URL")
-# selected = st.selectbox("City Open Data Portals", KNOWN_CKAN_API_URLS, None)
+
+api_urls = {v: k for k, v in KNOWN_CKAN_API_URLS.items()}
+selected = st.selectbox(
+    "City Open Data Portals", api_urls.keys(), format_func=lambda x: api_urls[x]
+)
+if selected:
+    ckan_base_url = selected
 
 st.subheader("2. Fine tune your search")
 search = st.text_input("Search terms (optional)")

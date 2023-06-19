@@ -5,14 +5,17 @@ import pandas as pd
 
 
 KNOWN_CKAN_API_URLS = {
+    "None": None,
     "City Of Toronto": "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/",
-    "Switzerland Open Data": "https://opendata.swiss/api/3/",
+    "Data.gov (no formats support)": "http://catalog.data.gov/api/3/",
+    "Australia Open Data (no formats support)": "https://data.gov.au/data/api/3/",
+    "Switzerland Open Data (no formats support)": "https://opendata.swiss/api/3/",
 }
 
 
 def search_packages(ckan_api_base, rows=50, start=0, formats=None, search=None):
     """Search packages from a CKAN API"""
-    selected_cols = ["title", "author", "id", "formats", "excerpt"]
+    selected_cols = ["title", "author", "id", "notes", "formats", "excerpt"]
     params = {
         "rows": rows,
         "start": start,
@@ -21,7 +24,7 @@ def search_packages(ckan_api_base, rows=50, start=0, formats=None, search=None):
         params["formats[]"] = formats
     if search:
         params["search"] = search
-    search_url = urljoin(ckan_api_base, "action/search_packages")
+    search_url = urljoin(ckan_api_base, "action/package_search")
     r = requests.get(search_url, params)
     if not r.ok:
         raise ValueError()
@@ -29,14 +32,19 @@ def search_packages(ckan_api_base, rows=50, start=0, formats=None, search=None):
     if not r_json["success"]:
         raise ValueError()
     search_df = pd.DataFrame(r_json["result"]["results"])
+    ordered_cols = [c for c in search_df.columns if c in selected_cols] + [
+        c for c in search_df.columns if c not in selected_cols
+    ]
+    # cols = [c for c in search_df.columns if c in selected_cols]
     if search_df.empty:
         return None
-    return search_df[selected_cols]
+    return search_df[ordered_cols]
+    # return search_df[cols]
 
 
 def list_packages(ckan_api_base):
     """List all packages. Returns a list of package IDs"""
-    search_url = urljoin(ckan_api_base, "action/search_packages")
+    search_url = urljoin(ckan_api_base, "action/package_list")
     r = requests.get(search_url)
     r_json = r.json()
     if not r_json["success"]:
