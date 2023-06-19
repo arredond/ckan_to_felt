@@ -7,9 +7,11 @@ import pandas as pd
 KNOWN_CKAN_API_URLS = {
     "None": None,
     "City Of Toronto": "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/",
-    "Data.gov (no formats support)": "http://catalog.data.gov/api/3/",
-    "Australia Open Data (no formats support)": "https://data.gov.au/data/api/3/",
-    "Switzerland Open Data (no formats support)": "https://opendata.swiss/api/3/",
+    "Data.gov": "http://catalog.data.gov/api/3/",
+    "Humanitarian Data Exchange": "https://data.humdata.org/api/3/",
+    "Canada Open Data": "https://open.canada.ca/data/en/api/3/",
+    "Australia Open Data": "https://data.gov.au/data/api/3/",
+    "Switzerland Open Data": "https://opendata.swiss/api/3/",
 }
 
 

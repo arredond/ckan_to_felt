@@ -23,14 +23,18 @@ ckan_base_url = st.text_input("CKAN Base URL")
 
 api_urls = {v: k for k, v in KNOWN_CKAN_API_URLS.items()}
 selected = st.selectbox(
-    "City Open Data Portals", api_urls.keys(), format_func=lambda x: api_urls[x]
+    "Example Open Data Portals", api_urls.keys(), format_func=lambda x: api_urls[x]
 )
 if selected:
     ckan_base_url = selected
 
 st.subheader("2. Fine tune your search")
 search = st.text_input("Search terms (optional)")
-formats = st.text_input("Format (SHP, GeoJSON, etc)")
+if selected == KNOWN_CKAN_API_URLS["City Of Toronto"]:
+    formats = st.text_input("Format (SHP, GeoJSON, etc)")
+else:
+    formats = None
+
 
 if ckan_base_url:
     search_df = search_packages(ckan_base_url, formats=formats, search=search)
