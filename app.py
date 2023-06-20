@@ -37,7 +37,6 @@ search = st.text_input("Search terms (optional)") or None
 
 
 if ckan_base_url:
-    st.text(f"{ckan_base_url}, {search}")
     search_df = search_packages(ckan_base_url, search=search)
     if search_df is not None:
         gb = GridOptionsBuilder.from_dataframe(search_df)
