@@ -9,27 +9,29 @@ KNOWN_CKAN_API_URLS = {
     "City Of Toronto": "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/",
     "Data.gov": "http://catalog.data.gov/api/3/",
     "Humanitarian Data Exchange": "https://data.humdata.org/api/3/",
+    "Data.gov.uk": "https://data.gov.uk/api/",
     "Canada Open Data": "https://open.canada.ca/data/en/api/3/",
     "Australia Open Data": "https://data.gov.au/data/api/3/",
     "Switzerland Open Data": "https://opendata.swiss/api/3/",
 }
 
 
-def search_packages(ckan_api_base, rows=50, start=0, formats=None, search=None):
+def search_packages(ckan_api_base, rows=50, start=0, search=None):
     """Search packages from a CKAN API"""
     selected_cols = ["title", "author", "id", "notes", "formats", "excerpt"]
     params = {
         "rows": rows,
         "start": start,
     }
-    if formats:
-        params["formats[]"] = formats
     if search:
-        params["search"] = search
+        params["q"] = search
     search_url = urljoin(ckan_api_base, "action/package_search")
-    r = requests.get(search_url, params)
-    if not r.ok:
-        raise ValueError()
+    try:
+        r = requests.get(search_url, params)
+        if not r.ok:
+            raise ValueError()
+    except ValueError:
+        raise ValueError(f"Invalid CKAN API URL: {search_url}")
     r_json = r.json()
     if not r_json["success"]:
         raise ValueError()

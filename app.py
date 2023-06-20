@@ -29,15 +29,16 @@ if selected:
     ckan_base_url = selected
 
 st.subheader("2. Fine tune your search")
-search = st.text_input("Search terms (optional)")
-if selected == KNOWN_CKAN_API_URLS["City Of Toronto"]:
-    formats = st.text_input("Format (SHP, GeoJSON, etc)")
-else:
-    formats = None
+search = st.text_input("Search terms (optional)") or None
+# if selected == KNOWN_CKAN_API_URLS["City Of Toronto"]:
+#     formats = st.text_input("Format (SHP, GeoJSON, etc)")
+# else:
+#     formats = None
 
 
 if ckan_base_url:
-    search_df = search_packages(ckan_base_url, formats=formats, search=search)
+    st.text(f"{ckan_base_url}, {search}")
+    search_df = search_packages(ckan_base_url, search=search)
     if search_df is not None:
         gb = GridOptionsBuilder.from_dataframe(search_df)
         gb.configure_pagination(paginationAutoPageSize=True)  # Add pagination
