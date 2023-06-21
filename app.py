@@ -7,6 +7,7 @@ from ckan_api import (
     create_open_in_felt_link,
     get_package,
     get_package_url,
+    list_res_formats,
     search_packages,
     KNOWN_CKAN_API_URLS,
 )
@@ -37,7 +38,15 @@ search = st.text_input("Search terms (optional)") or None
 
 
 if ckan_base_url:
-    search_df = search_packages(ckan_base_url, search=search)
+    res_formats = list_res_formats(ckan_base_url)
+    formats_with_counts = {k: f"{k} ({v})" for k, v in res_formats.items()}
+    format_options = [None] + list(formats_with_counts.keys())
+    res_format = st.selectbox(
+        "Filter by format",
+        format_options,
+        format_func=lambda x: formats_with_counts[x] if x else None,
+    )
+    search_df = search_packages(ckan_base_url, search=search, res_format=res_format)
     if search_df is not None:
         gb = GridOptionsBuilder.from_dataframe(search_df)
         gb.configure_pagination(paginationAutoPageSize=True)  # Add pagination

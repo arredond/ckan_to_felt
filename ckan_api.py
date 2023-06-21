@@ -16,8 +16,37 @@ KNOWN_CKAN_API_URLS = {
 }
 
 
-def search_packages(ckan_api_base, rows=50, start=0, search=None):
-    """Search packages from a CKAN API"""
+def search_packages_generic(ckan_api_base, params):
+    """Generic function to query the package_search endpoint
+
+    Used both to search actual packages and facets (filters)
+    """
+    search_url = urljoin(ckan_api_base, "action/package_search")
+    r = requests.get(search_url, params)
+    if not r.ok or not r.json()["success"]:
+        raise ValueError(f'Invalid request to "{search_url}" with params "{params}"')
+    return r.json()
+
+
+def list_facet(ckan_api_base, facet, limit=20):
+    """List values for a specific facet (filter)"""
+    params = {
+        "facet.field": f'["{facet}"]',
+        "facet.limit": f"{limit}",
+        "rows": 0,
+    }
+    r_dict = search_packages_generic(ckan_api_base, params)
+    facet_counts = r_dict["result"]["facets"][facet]
+    return facet_counts
+    # return pd.DataFrame.from_dict(facet_counts, orient='index', columns=['count'])
+
+
+def list_res_formats(ckan_api_base):
+    return list_facet(ckan_api_base, "res_format")
+
+
+def search_packages(ckan_api_base, rows=50, start=0, search=None, res_format=None):
+    """Search packages from a CKAN API and return a Pandas DataFrame"""
     selected_cols = ["title", "author", "id", "notes", "formats", "excerpt"]
     params = {
         "rows": rows,
@@ -25,16 +54,9 @@ def search_packages(ckan_api_base, rows=50, start=0, search=None):
     }
     if search:
         params["q"] = search
-    search_url = urljoin(ckan_api_base, "action/package_search")
-    try:
-        r = requests.get(search_url, params)
-        if not r.ok:
-            raise ValueError()
-    except ValueError:
-        raise ValueError(f"Invalid CKAN API URL: {search_url}")
-    r_json = r.json()
-    if not r_json["success"]:
-        raise ValueError()
+    if res_format:
+        params["fq"] = f"res_format:{res_format}"
+    r_json = search_packages_generic(ckan_api_base, params)
     search_df = pd.DataFrame(r_json["result"]["results"])
     ordered_cols = [c for c in search_df.columns if c in selected_cols] + [
         c for c in search_df.columns if c not in selected_cols
