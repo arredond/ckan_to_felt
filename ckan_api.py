@@ -42,12 +42,18 @@ def list_facet(ckan_api_base, facet, limit=20):
 
 
 def list_res_formats(ckan_api_base):
+    """List resource formats for a CKAN API"""
     return list_facet(ckan_api_base, "res_format")
+
+
+def extract_formats(resources):
+    """Extract comma-separated string of formats from CKAN resources list"""
+    return ",".join({res["format"] for res in resources})
 
 
 def search_packages(ckan_api_base, rows=50, start=0, search=None, res_format=None):
     """Search packages from a CKAN API and return a Pandas DataFrame"""
-    selected_cols = ["title", "author", "id", "notes", "formats", "excerpt"]
+    selected_cols = ["title", "formats", "excerpt", "author", "notes", "id"]
     params = {
         "rows": rows,
         "start": start,
@@ -58,7 +64,8 @@ def search_packages(ckan_api_base, rows=50, start=0, search=None, res_format=Non
         params["fq"] = f"res_format:{res_format}"
     r_json = search_packages_generic(ckan_api_base, params)
     search_df = pd.DataFrame(r_json["result"]["results"])
-    ordered_cols = [c for c in search_df.columns if c in selected_cols] + [
+    search_df["formats"] = search_df["resources"].map(extract_formats)
+    ordered_cols = [c for c in selected_cols if c in search_df.columns] + [
         c for c in search_df.columns if c not in selected_cols
     ]
     # cols = [c for c in search_df.columns if c in selected_cols]
